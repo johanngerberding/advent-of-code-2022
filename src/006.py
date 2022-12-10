@@ -7,7 +7,7 @@ def main():
 
     num_markers = 4
     res = 0
-    for i in range(len(data) - 4):
+    for i in range(len(data) - num_markers):
         markers = data[i:i+num_markers]
         if len(set(markers)) == num_markers: 
             res = i+num_markers
@@ -15,7 +15,15 @@ def main():
 
     print(f"Solution of Part 1: {res}")
 
+    num_markers = 14
+    res = 0
+    for i in range(len(data) - num_markers):
+        markers = data[i:i+num_markers]
+        if len(set(markers)) == num_markers: 
+            res = i+num_markers
+            break 
 
+    print(f"Solution of Part 2: {res}")
 
 if __name__ == "__main__":
     main()
