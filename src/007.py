@@ -50,58 +50,58 @@ class Dir:
             else: 
                 print("Problem!") 
 
-    def structure(self, nums: list, min_size: int): 
+    def structure(self, nums: list, size: int, g="smaller"): 
         out = []
         self.get_size(out) 
         s = sum(out) 
-        if s <= min_size: 
+        if s <= size and g == "smaller": 
             nums.append(s)  
-            print(f"{self.name}: {s}") 
+        elif s >= size and g == "bigger": 
+            nums.append(s)  
         
         for sdir in self.sub_dirs: 
-            sdir.structure(nums, min_size) 
+            sdir.structure(nums, size, g) 
 
-    def ls(self): 
-        for d in self.sub_dirs: 
-            print(str(d))
-        for f in self.files:
-            print(f)
- 
-
+   
 def main(): 
     inp = "../inputs/007.txt"
 
     with open(inp, 'r') as fp: 
         data = [el.strip() for el in fp.readlines()]
 
-    print(data)
-
     curr = Dir("/")
 
     for line in data: 
         if line.startswith("$ cd"): 
             ndir = line.split(" ")[-1]
-            print(f"Current dir: {curr}")
-            print(f"Current dir parent: {curr.parent}")
             curr = curr.cd(ndir)
-            print(f"New dir: {curr}") 
         elif line.startswith("$ ls"): 
             continue  
         elif line.startswith("dir"): 
             name = line.split(" ")[-1]
             curr.mkdir(name)
-            print(f"Created dir: {name}")
         elif line[0].isdigit():
             # new file
             size = int(line.split(" ")[0])
             filename = line.split(" ")[1]
             curr.touch(filename, size)
-            print(f"Created file: {filename}")
 
     nums = []
     curr = curr.cd("/")
-    curr.structure(nums, 100000)
-    print(f"Solution Part 1: {sum(nums)}") 
+    curr.structure(nums, 100000, "smaller")
+    print(f"Solution Part 1: {sum(nums)}")
+
+    max_space = 70000000
+    unused_space = 30000000
+    out = [] 
+    curr.get_size(out)
+    space_obtained = sum(out)
+    free_space = max_space - space_obtained 
+    del_space = unused_space - free_space 
+    nums = []
+    curr.structure(nums, del_space, "bigger")
+    nums.sort() 
+    print(f"Solution Part 2: {nums[0]}")
 
 
 if __name__ == "__main__":
