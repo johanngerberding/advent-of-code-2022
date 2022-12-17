@@ -1,17 +1,45 @@
 #!/usr/bin/env python3
-
-def parse(monkey: list): 
-    items = monkey[1][16:].split(',')
-    items = [int(el.strip()) for el in items]
-    op = monkey[2].split(' ')[-2:] 
-    divider = int(monkey[3].split(' ')[-1]) 
-    true_monkey = int(monkey[4].split(' ')[-1]) 
-    false_monkey = int(monkey[4].split(' ')[-1]) 
-    print(items)
-    print(op)
-    print(divider)
+from math import trunc 
 
 
+class Monkey: 
+    def __init__(self): 
+        self.items = None 
+        self.op = None 
+        self.div = None 
+        self.true_monkey = None 
+        self.false_monkey = None
+        self.num_inspects = 0
+
+    def parse(self, info: list): 
+        items = info[1][16:].split(',')
+        self.items = [int(el.strip()) for el in items]
+        self.op = info[2].split(' ')[-2:] 
+        self.div = int(info[3].split(' ')[-1]) 
+        self.true_monkey = int(info[4].split(' ')[-1]) 
+        self.false_monkey = int(info[5].split(' ')[-1])
+
+    def turn(self):
+        out = [] 
+        for item in self.items:
+            self.num_inspects += 1  
+            if self.op[0] == '*':
+                if self.op[1] == 'old': 
+                    wl = item * item 
+                else:  
+                    wl = item * int(self.op[1])
+            elif self.op[0] == '+':
+                if self.op[1] == 'old': 
+                    wl = item + item 
+                else:  
+                    wl = item + int(self.op[1]) 
+            wl = trunc(wl / 3) 
+            if wl % self.div == 0: 
+                out.append((self.true_monkey, wl)) 
+            else: 
+                out.append((self.false_monkey, wl))
+        self.items = []
+        return out 
 
 def main(): 
     inp = "../inputs/011.txt"
@@ -28,8 +56,29 @@ def main():
             m.append(el)
     monkeys.append(m)
 
+    monks = []
     for monkey in monkeys: 
-        parse(monkey)
+        m = Monkey() 
+        m.parse(monkey)
+        monks.append(m)
+    
+    for i in range(20): 
+        print(f"Round {i}")
+        for idx, monk in enumerate(monks): 
+            print(f"Monkey {idx}: {monk.items}") 
+        for monk in monks: 
+            moves = monk.turn()
+            for mv in moves: 
+                monks[mv[0]].items.append(mv[1])
+
+    inspects = []
+    for i, monk in enumerate(monks): 
+        print(f"Monkey {i}: {monk.num_inspects}")
+        inspects.append(monk.num_inspects)
+
+    inspects.sort() 
+    result = inspects[-1] * inspects[-2]
+    print(f"Solution Part 1: {result}")
 
 if __name__ == "__main__":
     main()
