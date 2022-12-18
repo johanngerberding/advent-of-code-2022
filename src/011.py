@@ -20,7 +20,7 @@ class Monkey:
         self.true_monkey = int(info[4].split(' ')[-1]) 
         self.false_monkey = int(info[5].split(' ')[-1])
 
-    def turn(self):
+    def turn(self, total_modulo: int):
         out = [] 
         for item in self.items:
             self.num_inspects += 1  
@@ -29,47 +29,22 @@ class Monkey:
                     wl = item * item 
                 else:  
                     wl = item * int(self.op[1])
-            elif self.op[0] == '+':
-                if self.op[1] == 'old': 
-                    wl = item + item 
-                else:  
-                    wl = item + int(self.op[1]) 
-            wl = trunc(wl / 3) 
-            if wl % self.div == 0: 
-                out.append((self.true_monkey, wl)) 
-            else: 
-                out.append((self.false_monkey, wl))
-        self.items = []
-        return out
-
-    def turn2(self):
-        out = [] 
-        for item in self.items:
-            self.num_inspects += 1  
-            if self.op[0] == '*':
-                wl = item 
-                """ 
-                if self.op[1] == 'old': 
-                    wl = item * item 
-                else:  
-                    wl = item * int(self.op[1])
-                """ 
             elif self.op[0] == '+':
                 wl = item + int(self.op[1]) 
             # wl = trunc(wl / 3) 
             if wl % self.div == 0: 
-                out.append((self.true_monkey, wl)) 
+                out.append((self.true_monkey, wl % total_modulo)) 
             else: 
-                out.append((self.false_monkey, wl))
+                out.append((self.false_monkey, wl % total_modulo))
         self.items = []
         return out
 
 
 def main(): 
-    inp = "../inputs/011_test.txt"
+    inp = "../inputs/011.txt"
     with open(inp, 'r') as fp: 
         data = [el.strip() for el in fp.readlines()]
-    """
+    
     monkeys = []
     m = [] 
     for el in data: 
@@ -86,24 +61,24 @@ def main():
         m.parse(monkey)
         monks.append(m)
     
+    total_modulo = 1 
+    for monk in monks: 
+        total_modulo *= monk.div
+    
     for i in range(20): 
-        print(f"Round {i}")
-        for idx, monk in enumerate(monks): 
-            print(f"Monkey {idx}: {monk.items}") 
         for monk in monks: 
-            moves = monk.turn()
+            moves = monk.turn(total_modulo)
             for mv in moves: 
                 monks[mv[0]].items.append(mv[1])
 
     inspects = []
     for i, monk in enumerate(monks): 
-        print(f"Monkey {i}: {monk.num_inspects}")
         inspects.append(monk.num_inspects)
 
     inspects.sort() 
     result = inspects[-1] * inspects[-2]
     print(f"Solution Part 1: {result}")
-    """ 
+    
     monkeys = []
     m = [] 
     for el in data: 
@@ -119,13 +94,10 @@ def main():
         m = Monkey() 
         m.parse(monkey)
         monks.append(m)
-    
+
     for i in tqdm.tqdm(range(10000)): 
-        # print(f"Round {i}")
-        # for idx, monk in enumerate(monks): 
-            # print(f"Monkey {idx}: {monk.items}") 
         for monk in monks: 
-            moves = monk.turn2()
+            moves = monk.turn(total_modulo)
             for mv in moves: 
                 monks[mv[0]].items.append(mv[1])
 
