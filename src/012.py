@@ -32,8 +32,9 @@ def shortest_distance(adj, s, dest, v):
     dist = [0 for _ in range(v)]
 
     if not bfs(adj, s, dest, v, pred, dist): 
-        print("Destination not reachable")
-
+        #print("Destination not reachable")
+        return dist[dest] 
+    
     path = []
     crawl = dest 
     path.append(crawl)
@@ -41,12 +42,12 @@ def shortest_distance(adj, s, dest, v):
     while pred[crawl] != -1: 
         path.append(pred[crawl])
         crawl = pred[crawl]
- 
+    
+    """
     for i in range(len(path) - 1, -1, -1): 
         print(path[i], end=' ')
-    
-    print()
-    print(f"Solution Part 1: {dist[dest]}")
+    """ 
+    return dist[dest]
 
 
 def main(): 
@@ -73,6 +74,13 @@ def main():
         row = row.replace('E', 'z')
         ndata.append(row)
     
+    a_idxs = []
+    for i, row in enumerate(ndata): 
+        for j, el in enumerate(row):
+            idx = i * len(row) + j
+            if el == 'a': 
+                a_idxs.append(idx) 
+
     for i, row in enumerate(ndata): 
         for j, el in enumerate(row):
             idx = i * len(row) + j 
@@ -110,13 +118,17 @@ def main():
                 if heights.index(right) <= heights.index(el) + 1: 
                     adjs[idx].append(right_idx)
 
-    for idx, adj in adjs.items(): 
-        print(f"Id: {idx}: {adj}")
 
-    print(f"Start idx: {start_idx}")
-    print(f"End idx: {end_idx}")
+    d = shortest_distance(adjs, start_idx, end_idx, len(adjs))
+    print(f"Solution Part 1: {d}")
+    
+    path_lengths = []
+    for idx in a_idxs: 
+        dist = shortest_distance(adjs, idx, end_idx, len(adjs)) 
+        path_lengths.append(dist)
 
-    shortest_distance(adjs, start_idx, end_idx, len(adjs))
+    print(f"Solution Part 2: {min(path_lengths)}")
+
 
 if __name__ == "__main__":
     main()
