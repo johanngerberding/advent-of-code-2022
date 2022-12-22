@@ -1,66 +1,39 @@
+from functools import cmp_to_key
 
-class Pair: 
-    def __init__(self, left: str, right: str): 
-        self.left = left[1:-1]
-        self.pos1 = 0
-        self.right = right[1:-1] 
-        self.pos2 = 0
 
+def compare(a, b): 
+    if type(a) == int: 
+        if type(b) == int: 
+            return (a > b) - (a < b)
+        return compare([a], b)
+    if type(b) == int: 
+        return compare(a, [b])
+    for aa, bb in zip(a, b): 
+        if r := compare(aa, bb):
+            return r 
+    return compare(len(a), len(b))
+
+
+with open("../inputs/013.txt", 'r') as fp: 
+    inp = fp.read()
+    part1, part2 = 0, 1 
+
+    for i, pairs in enumerate(inp.split("\n\n")):
+        left, right = map(eval, pairs.splitlines())
+        if compare(left, right) == -1: 
+            part1 += i + 1
+
+    print(f"Solution Part 1: {part1}")
+
+    pairs = [eval(p) for p in inp.splitlines() if p]
+    pairs.append([[2]])
+    pairs.append([[6]])
+    pairs.sort(key=cmp_to_key(compare))
+
+    for i, pair in enumerate(pairs): 
+        if pair == [[2]]: 
+            part2 *= i + 1
+        if pair == [[6]]:
+            part2 *= i + 1 
     
-    def compare(self): 
-        left_next = self.next_element(self.left, self.pos1) 
-        right_next = self.next_element(self.right, self.pos2)
-        print(left_next)
-        print(right_next)
-        if left_next.isnumeric() and right_next.isnumeric(): 
-            left_next = int(left_next)
-            right_next = int(right_next)
-            if left_next < right_next: 
-                return True 
-            return False 
-        elif left_next.isnumeric() and not right_next.isnumeric():
-            left_next = str([int(left_next)])
-         
-        
-        return False  
-
-    @staticmethod 
-    def next_element(part: str, pos: int):
-        sep = part.index(',') if ',' in part else None 
-        if not sep: 
-            return part[pos:] 
-
-        sub = part[pos:sep]
-        num_open = sub.count('[')
-        num_closed = sub.count(']')
-        
-        while num_open != num_closed:
-            sep = part[sep + 1:].index(',') if ',' in part[sep + 1:] else None 
-            if not sep:
-                return part[pos:] 
-            sub = part[pos:sep]
-            num_open = sub.count('[')
-            num_closed = sub.count(']')
-        
-        return sub
-
-def main(): 
-    with open("../inputs/013_test.txt", 'r') as fp: 
-        data = [el.strip() for el in fp.readlines()]
-
-    pairs = []
-    pair = [] 
-    for el in data: 
-        if el == '':
-            pairs.append(Pair(pair[0], pair[1])) 
-            pair = []
-        else: 
-            pair.append(el)
-    pairs.append(Pair(pair[0], pair[1]))
-
-    pairs[0].compare()
-
-
-
-if __name__ == "__main__":
-    main()
+    print(f"Solution Part 2: {part2}")
