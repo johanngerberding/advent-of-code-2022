@@ -1,3 +1,5 @@
+import tqdm 
+
 
 def manhattan(p1, p2): 
     return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
@@ -32,13 +34,6 @@ for sensor, beacon in zip(sensors, beacons):
     if maxx > max_x: 
         max_x = maxx
 
-    """ 
-    for i in range(minx, maxx + 1): 
-        for j in range(miny, maxy + 1):
-            temp = manhattan(sensor, (i, j))
-            if temp <= md and not area.get((i, j)):
-                area[(i, j)] = "#" 
-    """
 count = 0
 points = []
 for x in range(min_x, max_x): 
@@ -60,10 +55,17 @@ for sensor, beacon in zip(sensors, beacons):
 
 sbs = set(sbs)
 count -= len(sbs)
-"""
-for key, val in area.items(): 
-    if key[1] == 2000000 and val == "#": 
-        count += 1
-"""
 
 print(f"Solution Part 1: {count}")
+"""
+points = []
+for x in tqdm.tqdm(range(0, 4000000)): 
+    for y in range(0, 4000000): 
+        beacon = (x, y)
+        for sensor in sensors: 
+            md = manhattan((sensor[0], sensor[1]), beacon)
+            if md <= sensor[2]: 
+                points.append(beacon)
+
+print(len(points))
+"""
