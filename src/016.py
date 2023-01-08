@@ -1,5 +1,10 @@
 from collections import deque
 
+"""
+Struggled to solve it myself, got the solution from here:
+https://www.youtube.com/watch?v=bLMj50cpOug&ab_channel=hyper-neutrino
+"""
+
 valves = {} 
 tunnels = {} 
 
@@ -65,3 +70,11 @@ def dfs(time, valve, bitmask):
     return maxval
 
 print(dfs(30, "AA", 0))
+
+b = (1 << len(nonempty)) - 1 
+m = 0
+
+for i in range(b + 1): 
+    m = max(m, dfs(26, "AA", i) + dfs(26, "AA", b ^ i))
+
+print(m)
