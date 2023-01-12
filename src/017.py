@@ -1,11 +1,18 @@
+import tqdm 
+
 class Instructions:
     def __init__(self, insts: str): 
         self.instructions = insts 
-        self.idx = 0 
+        self.idx = 0
+        self.rounds = 0 
+
+    def get_curr(self): 
+        return self.instructions[self.idx] 
 
     def get_next(self):
         if self.idx == len(self.instructions): 
             self.idx = 0 
+            self.rounds += 1 
         res = self.instructions[self.idx]
         self.idx += 1 
         return res 
@@ -85,21 +92,70 @@ class Figure:
         self.figure = [row + el for el in self.figures[idx]]
 
 
-with open("../inputs/017.txt", 'r') as fp: 
-    insts = fp.readline()
+def get_tdv(chamber, instructions):
+    height = max(chamber.occupied) // 7 + 4
+    upper_row = [height * 7 + i for i in range(7)]
+    elems = []
+    for upper in upper_row: 
+        c = 0
+        bound = upper 
+        while True:
+            c -= 1  
+            nelem = bound - 7 
+            if nelem in chamber.occupied or nelem < 0: 
+                elems.append(c)
+                break  
+            bound = nelem 
+    
+    elems += [chamber.idx] 
+    ninst = instructions.idx
+    elems += [ninst]
+    return tuple(elems)
 
-instructions = Instructions(insts)
-chamber = Chamber() 
 
-for _ in range(2022): 
-    chamber.set_figure()
-    while chamber.curr: 
-        inst = instructions.get_next()
-        if inst == '>': 
-            chamber.right()
-        elif inst == '<': 
-            chamber.left() 
-        
-        chamber.down()
 
-print(max(chamber.occupied) // 7 + 1)
+def main(): 
+    with open("../inputs/017.txt", 'r') as fp: 
+        insts = fp.readline()
+
+    instructions = Instructions(insts)
+    chamber = Chamber() 
+
+    topdown = {}
+    rocks_height = {} 
+    first = True 
+
+    for i in tqdm.tqdm(range(10000)): 
+        chamber.set_figure()
+        # safe top down view
+        if not first:  
+            td = get_tdv(chamber, instructions)
+            if not td in topdown: 
+                topdown[td] = (i, max(chamber.occupied) // 7 + 1)
+                rocks_height[i] =  max(chamber.occupied) // 7 + 1
+            else:
+                rocks = topdown[td][1]
+                cycles = (1_000_000_000_000 - topdown[td][0]) 
+                reps = int(cycles / (i - topdown[td][0])) 
+                rocks += (reps * ((max(chamber.occupied) // 7 + 1) - topdown[td][1])) 
+                mod = cycles % (i - topdown[td][0])
+                h = rocks_height[mod + topdown[td][0]] 
+                h -= topdown[td][1]
+                rocks += h 
+                print(f"Solution Part 2: {rocks}")
+                return 
+        first = False  
+        while chamber.curr: 
+            inst = instructions.get_next()
+            if inst == '>': 
+                chamber.right()
+            elif inst == '<': 
+                chamber.left() 
+            
+            chamber.down()
+
+    print(max(chamber.occupied) // 7 + 1)
+
+
+if __name__ == "__main__":
+    main()  
